@@ -50,15 +50,15 @@ class Signal:
         plt.show()
 
 
-class SenoidSignal:
-    senoid_frequency: np.ndarray
+class CosenoidSignal:
+    cosenoid_frequency: np.ndarray
     amplitude: float
     phase: float
     signal: Signal
 
-    def __init__(self, senoid_frequency, sample_rate, length,
-                 *, amplitude=0, phase=0):
-        self.senoid_frequency = senoid_frequency
+    def __init__(self, cosenoid_frequency, sample_rate, length,
+                 *, amplitude=1, phase=0):
+        self.cosenoid_frequency = cosenoid_frequency
         self.amplitude = amplitude
         self.phase = np.deg2rad(phase)
         self.signal = self._get_signal(sample_rate, length)
@@ -66,8 +66,8 @@ class SenoidSignal:
     def _get_signal(self, sample_rate, length):
         sample_number = int(sample_rate * length)
         time = np.linspace(0., length, sample_number)
-        sine = np.sin(2*np.pi*self.senoid_frequency*time + self.phase)
-        data_array = self.amplitude * sine
+        cosine = np.cos(2*np.pi*self.cosenoid_frequency*time + self.phase)
+        data_array = self.amplitude * cosine
         return Signal(data_array, sample_rate, length)
 
 

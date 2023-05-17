@@ -1,16 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import rfft, rfftfreq
+from scipy.signal import hilbert, butter, sosfilt
 
-from common import Signal, SenoidSignal, Audio
+from common import Signal, CosenoidSignal, Audio
 
 class ModulatedSignal:
     sample_rate: float
     length: float
     modulated: Signal
-    baseband: Signal
-    modulator: SenoidSignal | Audio
-    carrier: SenoidSignal
+    demodulated_noncoherent: Signal
+    modulator: CosenoidSignal | Audio
+    carrier: CosenoidSignal
     k_a: float
 
     def __init__(self, signal, carrier, k_a):
@@ -20,7 +21,7 @@ class ModulatedSignal:
         self.length = self._get_length()
         self.k_a = self._get_k_a(k_a)
         self.modulated = self._get_signal()
-        self.baseband = self._get_bandbase()
+        self.demodulated_noncoherent = self._demodulated_signal_noncoherent()
 
     def _get_k_a(self, k_a):
         if k_a <= 0:
@@ -47,8 +48,27 @@ class ModulatedSignal:
         data_array = (1 + self.k_a*modulator_data_array) * carrier_data_array
         return Signal(data_array, self.sample_rate, self.length)
 
-    def _get_bandbase(self):
-        modulator_data_array = self.modulator.signal.data_array
-        carrier_amplitude = self.carrier.amplitude
-        data_array = carrier_amplitude * (1 + self.k_a*modulator_data_array)
-        return Signal(data_array, self.sample_rate, self.length)
+    def _multiplying_stage(self):
+        sincronizing_signal = CosenoidSignal(
+            self.carrier.cosenoid_frequency,
+            self.sample_rate,
+            self.length
+        )
+        sincronizing_cosine = sincronizing_signal.signal.data_array
+        return self.modulated.data_array * 2 * sincronizing_cosine
+
+    def _lowpass_stage(self, order, cuttoff_frequency):
+        multiplied = self._multiplying_stage()
+        sos = butter(order, cuttoff_frequency,
+                     output='sos', fs=self.sample_rate)
+        filtered = sosfilt(sos, multiplied)
+        filtered = filtered - np.mean(filtered)
+        return Signal(filtered, self.sample_rate, self.length)
+
+    def _demodulated_signal_noncoherent(self):
+        abs_baseband = self._absolute_baseband()
+        demodulated_array = abs_baseband - np.mean(abs_baseband)
+        return Signal(demodulated_array, self.sample_rate, self.length)
+
+    def _absolute_baseband(self):
+        return np.abs(hilbert(self.modulated.data_array))
