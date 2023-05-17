@@ -74,12 +74,15 @@ class SenoidSignal:
 class Audio:
     signal: Signal
 
-    def __init__(self, audio_path):
-        self.signal = self._get_signal(audio_path)
+    def __init__(self, audio_path, scale):
+        self.signal = self._get_signal(audio_path, scale)
 
-    def _get_signal(self, audio_path):
+    def _get_signal(self, audio_path, scale):
         sample_rate, audio_stereo = wavfile.read(audio_path)
         data_array = audio_stereo[:, 0]
         sample_number = data_array.shape[0]
         length = sample_number / sample_rate
-        return Signal(data_array, sample_rate, length)
+        time = np.linspace(0., length, sample_number)
+        new_time = np.linspace(0., length, scale*sample_number)
+        interpolated_data = np.interp(new_time, time, data_array)
+        return Signal(interpolated_data, scale*sample_rate, length)
