@@ -9,18 +9,23 @@ class ModulatedSignal:
     sample_rate: float
     length: float
     modulated: Signal
+    demodulated_coherent: Signal
     demodulated_noncoherent: Signal
     modulator: CosenoidSignal | Audio
     carrier: CosenoidSignal
     k_a: float
 
-    def __init__(self, signal, carrier, k_a):
+    def __init__(self, signal, carrier, k_a,
+                 filter_order, filter_cutoff_frequency):
         self.modulator = signal
         self.carrier = carrier
         self.sample_rate = self._get_sample_rate()
         self.length = self._get_length()
         self.k_a = self._get_k_a(k_a)
         self.modulated = self._get_signal()
+        self.demodulated_coherent = self._demodulated_signal_coherent(
+            filter_order, filter_cutoff_frequency
+            )
         self.demodulated_noncoherent = self._demodulated_signal_noncoherent()
 
     def _get_k_a(self, k_a):
@@ -57,7 +62,7 @@ class ModulatedSignal:
         sincronizing_cosine = sincronizing_signal.signal.data_array
         return self.modulated.data_array * 2 * sincronizing_cosine
 
-    def _lowpass_stage(self, order, cuttoff_frequency):
+    def _demodulated_signal_coherent(self, order, cuttoff_frequency):
         multiplied = self._multiplying_stage()
         sos = butter(order, cuttoff_frequency,
                      output='sos', fs=self.sample_rate)
