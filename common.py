@@ -16,7 +16,7 @@ class Signal:
 
     @property
     def sample_number(self):
-        return int(self.sample_rate * self.length)
+        return self.data_array.shape[0]  # int(self.sample_rate * self.length)
 
     @property
     def time(self):
@@ -51,24 +51,29 @@ class Signal:
 
 
 class CosenoidSignal:
-    cosenoid_frequency: np.ndarray
+    frequency: np.ndarray
     amplitude: float
     phase: float
-    signal: Signal
+    cosenoid: Signal
+    senoid: Signal
 
-    def __init__(self, cosenoid_frequency, sample_rate, length,
+    def __init__(self, frequency, sample_rate, length,
                  *, amplitude=1, phase=0):
-        self.cosenoid_frequency = cosenoid_frequency
+        self.frequency = frequency
         self.amplitude = amplitude
         self.phase = np.deg2rad(phase)
-        self.signal = self._get_signal(sample_rate, length)
+        self.signal, self.senoid = self._get_signal(sample_rate, length)
 
     def _get_signal(self, sample_rate, length):
         sample_number = int(sample_rate * length)
         time = np.linspace(0., length, sample_number)
-        cosine = np.cos(2*np.pi*self.cosenoid_frequency*time + self.phase)
-        data_array = self.amplitude * cosine
-        return Signal(data_array, sample_rate, length)
+        cosine = np.cos(2*np.pi*self.frequency*time + self.phase)
+        sine = np.cos(2*np.pi*self.frequency*time + self.phase)
+        cosine_array = self.amplitude * cosine
+        sine_array = self.amplitude * sine
+        cosine_signal = Signal(cosine_array, sample_rate, length)
+        sine_signal = Signal(sine_array, sample_rate, length)
+        return cosine_signal, sine_signal
 
 
 class Audio:
