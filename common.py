@@ -68,7 +68,7 @@ class CosenoidSignal:
         sample_number = int(sample_rate * length)
         time = np.linspace(0., length, sample_number)
         cosine = np.cos(2*np.pi*self.frequency*time + self.phase)
-        sine = np.cos(2*np.pi*self.frequency*time + self.phase)
+        sine = np.sin(2*np.pi*self.frequency*time + self.phase)
         cosine_array = self.amplitude * cosine
         sine_array = self.amplitude * sine
         cosine_signal = Signal(cosine_array, sample_rate, length)
