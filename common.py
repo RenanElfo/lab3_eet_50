@@ -16,7 +16,7 @@ class Signal:
 
     @property
     def sample_number(self):
-        return self.data_array.shape[0]  # int(self.sample_rate * self.length)
+        return self.data_array.shape[0]
 
     @property
     def time(self):
@@ -44,7 +44,6 @@ class Signal:
         amplitude = np.abs(self.fourier_array)[start_index:end_index]
         plt.figure()
         plt.plot(frequencies, amplitude)
-        plt.title('Absolute Value of Amplitude')
         plt.xlabel('Frequência [Hz]')
         plt.ylabel('Amplitude')
         plt.show()
