@@ -22,13 +22,13 @@ class Modulation:
         modulator_sample_rate = self.modulator.signal.sample_rate
         carrier_sample_rate = self.carrier.signal.sample_rate
         if modulator_sample_rate != carrier_sample_rate:
-            message = "sinal and carrier don't have the same sample rate."
+            message = "modulator and carrier don't have the same sample rate."
             raise ValueError(message)
         return modulator_sample_rate
 
     def _get_length(self):
         if self.modulator.signal.length != self.carrier.signal.length:
-            message = "sinal and carrier don't have the same length."
+            message = "modulator and carrier don't have the same length."
             raise ValueError(message)
         return self.modulator.signal.length
 
