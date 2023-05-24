@@ -1,71 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import rfft, rfftfreq
-from scipy.signal import hilbert, butter, sosfilt
+from scipy.signal import hilbert
 
-from common import Signal, CosenoidSignal, Audio
-
-
-class Modulation:
-    sample_rate: float
-    length: float
-    modulator: CosenoidSignal | Audio
-    carrier: CosenoidSignal
-
-    def __init__(self, signal, carrier):
-        self.modulator = signal
-        self.carrier = carrier
-        self.sample_rate = self._get_sample_rate()
-        self.length = self._get_length()
-
-    def _get_sample_rate(self):
-        modulator_sample_rate = self.modulator.signal.sample_rate
-        carrier_sample_rate = self.carrier.signal.sample_rate
-        if modulator_sample_rate != carrier_sample_rate:
-            message = "modulator and carrier don't have the same sample rate."
-            raise ValueError(message)
-        return modulator_sample_rate
-
-    def _get_length(self):
-        if self.modulator.signal.length != self.carrier.signal.length:
-            message = "modulator and carrier don't have the same length."
-            raise ValueError(message)
-        return self.modulator.signal.length
-
-
-class CoherentDemodulation:
-    demodulated: Signal
-
-    def __init__(self, modulated_signal, carrier_frequency,
-                 filter_order, filter_cutoff_frequency):
-        self.demodulated = self._demodulated_signal_coherent(
-            modulated_signal, carrier_frequency,
-            filter_order, filter_cutoff_frequency
-        )
-
-    def _demodulated_signal_coherent(self, modulated_signal,
-                                     carrier_frequency,
-                                     order, cuttoff_frequency):
-        multiplied = self._demodulation_multiplying_stage(
-            modulated_signal, carrier_frequency
-            )
-        sample_rate = modulated_signal.sample_rate
-        length = modulated_signal.length
-        sos = butter(order, cuttoff_frequency,
-                     output='sos', fs=sample_rate)
-        filtered = sosfilt(sos, multiplied)
-        filtered = filtered - np.mean(filtered)
-        return Signal(filtered, sample_rate, length)
-
-    def _demodulation_multiplying_stage(
-            self, modulated_signal, carrier_frequency):
-        sincronizing_signal = CosenoidSignal(
-            carrier_frequency,
-            modulated_signal.sample_rate,
-            modulated_signal.length
-        )
-        sincronizing_cosine = sincronizing_signal.signal.data_array
-        return modulated_signal.data_array * 2 * sincronizing_cosine
+from common import Signal, Modulation, CoherentDemodulation
 
 
 class DSBModulatedSignal:
@@ -78,8 +16,9 @@ class DSBModulatedSignal:
         self.modulation = Modulation(modulator, carrier)
         self.k_a = self._get_k_a(k_a)
         self.modulated = self._get_signal()
-        self.demodulated = self._demodulated_signal(filter_order,
-                                                    filter_cutoff_frequency)
+        self.demodulated = self._demodulated_signal(
+            filter_order, filter_cutoff_frequency
+            )
 
     def _get_k_a(self, k_a):
         if k_a <= 0:
@@ -122,8 +61,9 @@ class DSBSCModulatedSignal:
                  filter_order, filter_cutoff_frequency):
         self.modulation = Modulation(modulator, carrier)
         self.modulated = self._get_signal()
-        self.demodulated = self._demodulated_signal(filter_order,
-                                                    filter_cutoff_frequency)
+        self.demodulated = self._demodulated_signal(
+            filter_order, filter_cutoff_frequency
+            )
 
     def _get_signal(self):
         modulator_data_array = self.modulation.modulator.signal.data_array
