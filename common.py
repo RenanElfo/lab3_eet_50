@@ -53,7 +53,7 @@ class CosenoidSignal:
     frequency: np.ndarray
     amplitude: float
     phase: float
-    cosenoid: Signal
+    signal: Signal
     senoid: Signal
 
     def __init__(self, frequency, sample_rate, length,
