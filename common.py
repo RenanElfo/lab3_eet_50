@@ -38,15 +38,14 @@ class Signal:
         data = self.data_array[time_start:time_end]
         frequencies = self.fourier_frequencies[frequency_start:frequency_end]
         amplitude = np.abs(self.fourier_array)[frequency_start:frequency_end]
-        plt.figure().suptitle(title)
-        plt.subplot(211)
-        plt.plot(time, data)
-        plt.xlabel('Tempo [s]')
-        plt.ylabel('Amplitude')
-        plt.subplot(212)
-        plt.plot(frequencies, amplitude)
-        plt.xlabel('Frequência [Hz]')
-        plt.ylabel('Amplitude')
+        figure, axis = plt.subplots(2, 1, constrained_layout=True)
+        figure.suptitle(title)
+        axis[0].plot(time, data)
+        axis[0].set_xlabel('Tempo [s]')
+        axis[0].set_ylabel('Amplitude')
+        axis[1].plot(frequencies, amplitude)
+        axis[1].set_xlabel('Frequência [Hz]')
+        axis[1].set_ylabel('Amplitude')
         plt.show()
 
     def plot_data(self, start_index=0, end_index=-1):
