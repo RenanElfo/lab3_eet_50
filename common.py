@@ -31,6 +31,24 @@ class Signal:
     def fourier_array(self):
         return rfft(self.data_array, norm='forward')
 
+    def plot_both(self, title='Time and Frequency Plot of Signal', *,
+                  time_start=0, time_end=-1,
+                  frequency_start=0, frequency_end=-1):
+        time = self.time[time_start:time_end]
+        data = self.data_array[time_start:time_end]
+        frequencies = self.fourier_frequencies[frequency_start:frequency_end]
+        amplitude = np.abs(self.fourier_array)[frequency_start:frequency_end]
+        plt.figure().suptitle(title)
+        plt.subplot(211)
+        plt.plot(time, data)
+        plt.xlabel('Tempo [s]')
+        plt.ylabel('Amplitude')
+        plt.subplot(212)
+        plt.plot(frequencies, amplitude)
+        plt.xlabel('Frequência [Hz]')
+        plt.ylabel('Amplitude')
+        plt.show()
+
     def plot_data(self, start_index=0, end_index=-1):
         time = self.time[start_index:end_index]
         data = self.data_array[start_index:end_index]
